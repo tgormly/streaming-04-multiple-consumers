@@ -10,18 +10,9 @@ import pika
 import sys
 import webbrowser
 import csv
-import logging
+from util_logger import setup_logger
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    handlers=[
-        logging.FileHandler("app.log"),
-        logging.StreamHandler()
-    ]
-)
+logger, logname = setup_logger(__file__)
 
 # use to control whether or not admin page is offered to user.
 # change to true to receive offer
@@ -48,13 +39,13 @@ def send_message(host: str, queue_name: str, message: str):
     """
 
     try:
-        logging.info(f"send_message({host=}, {queue_name=}, {message=})")
+        logger.info(f"send_message({host=}, {queue_name=}, {message=})")
         # create a blocking connection to the RabbitMQ server
         conn = pika.BlockingConnection(pika.ConnectionParameters(host))
 
         # use the connection to create a communication channel
         ch = conn.channel()
-        logging.info(f"connection opened: {host=}, {queue_name=}")
+        logger.info(f"connection opened: {host=}, {queue_name=}")
 
         # use the channel to declare a durable queue
         # a durable queue will survive a RabbitMQ server restart
@@ -67,7 +58,7 @@ def send_message(host: str, queue_name: str, message: str):
         ch.basic_publish(exchange="", routing_key=queue_name, body=message)
 
         # print a message to the console for the user
-        logging.info(f" [x] Sent {message}")
+        logger.info(f" [x] Sent {message}")
 
     except pika.exceptions.AMQPConnectionError as e:
         print(f"Error: Connection to RabbitMQ server failed: {e}")
@@ -76,7 +67,7 @@ def send_message(host: str, queue_name: str, message: str):
     finally:
         # close the connection to the server
         conn.close()
-        logging.info(f"connection closed: {host=}, {queue_name=}")
+        logger.info(f"connection closed: {host=}, {queue_name=}")
 
 
 def load_csv(filepath):
@@ -88,11 +79,18 @@ def load_csv(filepath):
     parameters:
     filepath (str) - meant to be a valid filepath for accessing a csv file
     """
+    # create empty list
     rows = []
+    logger.info(f'Attempting to access {filepath=}')
+
+    # access file and append each row to the list
     with open(filepath, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             rows.append(row['message'])
+
+    # return list
+    logger.info(f'Data loaded from {filepath=}')
     return rows
 
 
@@ -122,4 +120,5 @@ if __name__ == "__main__":
     file_path = 'tasks.csv'
 
     # transmit task list
+    logger.info(f'Beginning process: {file_path=}')
     transmit_task_list_from_csv(file_path)

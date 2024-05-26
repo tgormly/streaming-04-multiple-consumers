@@ -56,6 +56,9 @@ How are tasks distributed?
 Monitor the windows with at least two workers. 
 Which worker gets which tasks?
 
+## Version 3 Emitter
+
+The version 3 emitter works by using one main function that receives a filename, a host name, and a queue name.  The function then uses a few other functions to load all of the rows from the csv listed in the file name into a list.  The list is then iterated over and a message is sent to RabbitMQ with each iteration.
 
 ## Reference
 

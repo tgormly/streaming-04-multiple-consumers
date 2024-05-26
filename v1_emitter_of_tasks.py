@@ -16,18 +16,30 @@ Work Queues - one task producer / many workers sharing work.
 import pika
 import sys
 import webbrowser
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
 
 def offer_rabbitmq_admin_site():
     """Offer to open the RabbitMQ Admin website"""
-    # ans = input("Would you like to monitor RabbitMQ queues? y or n ")
+    ans = input("Would you like to monitor RabbitMQ queues? y or n ")
     print()
-    # if ans.lower() == "y":
-        # webbrowser.open_new("http://localhost:15672/#/queues")
-        # print()
+    if ans.lower() == "y":
+        webbrowser.open_new("http://localhost:15672/#/queues")
+        print()
         
 
 # call the function defined above
-# offer_rabbitmq_admin_site()
+offer_rabbitmq_admin_site()
 
 # create a blocking connection to the RabbitMQ server
 connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))

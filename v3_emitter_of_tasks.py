@@ -2,13 +2,26 @@
 Tim Gormly
 05/26/2024
 
-    This program sends a message to a queue on the RabbitMQ server.
-    Make tasks harder/longer-running by adding dots at the end of the message.
+    The program will read through a csv file and transmit the data
+    as messages to a queue on the RabbitMQ server.
 """
 
 import pika
 import sys
 import webbrowser
+import csv
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
 
 # use to control whether or not admin page is offered to user.
 # change to true to receive offer
@@ -35,11 +48,13 @@ def send_message(host: str, queue_name: str, message: str):
     """
 
     try:
+        logging.info(f"send_message({host=}, {queue_name=}, {message=})")
         # create a blocking connection to the RabbitMQ server
         conn = pika.BlockingConnection(pika.ConnectionParameters(host))
 
         # use the connection to create a communication channel
         ch = conn.channel()
+        logging.info(f"connection opened: {host=}, {queue_name=}")
 
         # use the channel to declare a durable queue
         # a durable queue will survive a RabbitMQ server restart
@@ -52,7 +67,7 @@ def send_message(host: str, queue_name: str, message: str):
         ch.basic_publish(exchange="", routing_key=queue_name, body=message)
 
         # print a message to the console for the user
-        print(f" [x] Sent {message}")
+        logging.info(f" [x] Sent {message}")
 
     except pika.exceptions.AMQPConnectionError as e:
         print(f"Error: Connection to RabbitMQ server failed: {e}")
@@ -61,18 +76,50 @@ def send_message(host: str, queue_name: str, message: str):
     finally:
         # close the connection to the server
         conn.close()
+        logging.info(f"connection closed: {host=}, {queue_name=}")
 
-# Standard Python idiom to indicate main program entry point
-# This allows us to import this module and use its functions
-# without executing the code below.
+
+def load_csv(filepath):
+    """
+    Iterates through a csv file.  Each row is
+    appended to a list that is returned by the
+    function
+
+    parameters:
+    filepath (str) - meant to be a valid filepath for accessing a csv file
+    """
+    rows = []
+    with open(filepath, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            rows.append(row['message'])
+    return rows
+
+
+def transmit_task_list_from_csv(csv_file='./tasks.csv', host='localhost', queue_name='task_queue3'):
+    """
+    Uses load_csv and send_message to transmit messages to a RabbitMQ
+    server from rows in a CSV file.
+
+    Parameters:
+    csv_file (str) - this should be a filepath to a valid csv file
+    """
+    # load csv file into list
+    task_list = load_csv(csv_file)
+
+    # iterate over list and send each item as a message to RabbitMQ
+    for task in task_list:
+        send_message(host, queue_name, task)
+        
+
 # If this is the program being run, then execute the code below
 if __name__ == "__main__":  
+
     # ask the user if they'd like to open the RabbitMQ Admin site
     offer_rabbitmq_admin_site()
-    # get the message from the command line
-    # if no arguments are provided, use the default message
-    # use the join method to convert the list of arguments into a string
-    # join by the space character inside the quotes
-    message = " ".join(sys.argv[1:]) or "Second task....."
-    # send the message to the queue
-    send_message("localhost","task_queue2",message)
+
+    # specify file path for data source
+    file_path = 'tasks.csv'
+
+    # transmit task list
+    transmit_task_list_from_csv(file_path)

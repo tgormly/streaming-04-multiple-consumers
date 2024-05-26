@@ -19,15 +19,15 @@ import webbrowser
 
 def offer_rabbitmq_admin_site():
     """Offer to open the RabbitMQ Admin website"""
-    ans = input("Would you like to monitor RabbitMQ queues? y or n ")
+    # ans = input("Would you like to monitor RabbitMQ queues? y or n ")
     print()
-    if ans.lower() == "y":
-        webbrowser.open_new("http://localhost:15672/#/queues")
-        print()
+    # if ans.lower() == "y":
+        # webbrowser.open_new("http://localhost:15672/#/queues")
+        # print()
         
 
 # call the function defined above
-offer_rabbitmq_admin_site()
+# offer_rabbitmq_admin_site()
 
 # create a blocking connection to the RabbitMQ server
 connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))

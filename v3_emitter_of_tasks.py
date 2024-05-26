@@ -4,23 +4,24 @@ Tim Gormly
 
     This program sends a message to a queue on the RabbitMQ server.
     Make tasks harder/longer-running by adding dots at the end of the message.
-
-    Author: Denise Case
-    Date: January 15, 2023
-
 """
 
 import pika
 import sys
 import webbrowser
 
+# use to control whether or not admin page is offered to user.
+# change to true to receive offer
+show_offer = False
+
 def offer_rabbitmq_admin_site():
     """Offer to open the RabbitMQ Admin website"""
-    ans = input("Would you like to monitor RabbitMQ queues? y or n ")
-    print()
-    if ans.lower() == "y":
-        webbrowser.open_new("http://localhost:15672/#/queues")
+    if show_offer:
+        ans = input("Would you like to monitor RabbitMQ queues? y or n ")
         print()
+        if ans.lower() == "y":
+            webbrowser.open_new("http://localhost:15672/#/queues")
+            print()
 
 def send_message(host: str, queue_name: str, message: str):
     """

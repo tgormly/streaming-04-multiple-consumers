@@ -40,14 +40,15 @@ Explore the RabbitMQ website.
 1. Run listening_worker.py
 
 Will it terminate on its own? How do you know? 
+>it will not terminate on its own.  It will only stop listening when there is a keyoard interrupt or the program is terminated for some other reason.
 
 ## Ready for Work
 
-1. Use your emitter_of_tasks to produce more task messages.
+1. Use your emitter_of_tasks to produce more task messages. ✅
 
 ## Start Another Listening Worker 
 
-1. Use your listening_worker.py script to launch a second worker. 
+1. Use your listening_worker.py script to launch a second worker. ✅
 
 Follow the tutorial. 
 Add multiple tasks (e.g. First message, Second message, etc.)
@@ -64,3 +65,4 @@ Which worker gets which tasks?
 ## Screenshot
 
 See a running example with at least 3 concurrent process windows here:
+![An image of three terminals](./3Terminals.png)

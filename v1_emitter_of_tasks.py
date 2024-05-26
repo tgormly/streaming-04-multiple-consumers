@@ -1,4 +1,6 @@
 """
+Tim Gormly
+05/26/2024
 
 Creates and sends a task message to the queue each execution.
 This process runs and finishes. 
@@ -22,6 +24,7 @@ def offer_rabbitmq_admin_site():
     if ans.lower() == "y":
         webbrowser.open_new("http://localhost:15672/#/queues")
         print()
+        
 
 # call the function defined above
 offer_rabbitmq_admin_site()
